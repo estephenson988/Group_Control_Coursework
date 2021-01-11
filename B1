@@ -1,0 +1,60 @@
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+
+# introducing values
+m = 0.425
+g = 9.81
+d = 0.42
+delta = 0.65
+r = 0.125
+R = 53
+L0 = 0.120
+L1 = 0.025
+a = 1.2
+c = 6.815
+k = 1880
+b = 10.4
+phi = 42*(np.pi/180)
+
+# calculating the min and max values
+x_min = d + (m*g*math.sin(phi))/k
+print("x_min", x_min)
+
+x_max = delta
+print("x_max", x_max)
+
+xe_point = 0.75*x_min + 0.25*x_max
+print("xe_point", xe_point)
+
+# substituting the x_eq value into the equations for I and V
+I_eq = math.sqrt((k*(xe_point-d)*(delta-xe_point)**2)/c - (m*g*math.sin(phi)*(delta-xe_point)**2)/c)
+print("I_eq", I_eq)
+
+V_eq = I_eq * R
+print("V_eq", V_eq)
+
+
+# plotting the graphs of I_eq and V_eq between x_eq values of 0-1
+def I_e(x_e):
+    return np.sqrt(276*(x_e**3) - 475*(x_e**2) + 268*x_e - 49.09)
+
+
+x_e = np.linspace(0, 1, 100)
+plt.plot(x_e, I_e(x_e))
+plt.xlabel('x^e')
+plt.ylabel('I^e)')
+plt.grid()
+plt.show()
+
+
+def V_e(x_e):
+    return 53*(np.sqrt(276*(x_e**3) - 475*(x_e**2) + 268*x_e - 49.09))
+
+
+x_e = np.linspace(x_min, x_max, 100)
+plt.plot(x_e, V_e(x_e))
+plt.xlabel('x^e')
+plt.ylabel('V^e)')
+plt.grid()
+plt.show()
