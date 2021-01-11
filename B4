@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+import sympy as sym
+
+# step 1. introduce the necessary symbols
+V, e, m, g, d, delta, r, R, L0, L1, a, c, k, b, phi, x1, x2, x3 = sym.symbols('V, e, m, g, d, delta, r, R, L0, L1, alpha, c, k, b, phi, x1, x2, x3')
+
+f = (5*c)/(7*m)*x3**2/(d-x1)**2 + (5/7)*g*sym.sin(phi) - (5*k)/(7*m)*(x1-d) - (5*b)/(7*m)*x2
+h = (V - R*x3)/(L0 + L1 * sym.exp(-a*(delta-x1)))
+
+# step 2. differentiate f wrt x1, x2, x3 and v
+d_f_x1 = f.diff(x1)
+d_f_x2 = f.diff(x2)
+d_f_x3 = f.diff(x3)
+d_h_x1 = h.diff(x1)
+d_h_x3 = h.diff(x3)
+d_h_V = h.diff(V)
+
+# step 3. substitute x1=x1^e, x2=x2^e, x3=x3^e, v=v^e into the
+#         above derivatives
+a1 = d_f_x1.subs([(x1, 0.65), (x2, 0), (x3, 0.68)])
+a2 = d_f_x2.subs([(x1, 0.65), (x2, 0), (x3, 0.68)])
+a3 = d_f_x3.subs([(x1, 0.65), (x2, 0), (x3, 0.68)])
+b1 = d_h_x1.subs([(x1, 0.65), (x3, 0.68), (V,  36.1)])
+b2 = d_h_x3.subs([(x1, 0.65), (x3, 0.68), (V,  36.1)])
+b3 = d_h_V.subs([(x1, 0.65), (x3, 0.68), (V,  36.1)])
+
+m_v = 0.425
+g_v = 9.81
+d_v = 0.42
+delta_v = 0.65
+r_v = 0.125
+R_v = 53
+L0_v = 0.120
+L1_v = 0.025
+a_v = 1.2
+c_v = 6.815
+k_v = 1880
+b_v = 10.4
+phi_v = 42*(np.pi/180)
+
+
+def substitute(z):
+    substitutions = [(m, m_v), (g, g_v), (d, d_v), (delta, delta_v), (r, r_v), (R, R_v), (L0, L0_v), (L1, L1_v), (a, a_v), (c, c_v), (k, k_v), (b, b_v), (phi, phi_v)]
+    return float(z.subs(substitutions))
+
+
+a1_value = substitute(a1)
+a2_value = substitute(a2)
+a3_value = substitute(a3)
+b1_value = substitute(b1)
+b2_value = substitute(b2)
+b3_value = substitute(b3)
+
+print(a1_value)
+print(a2_value)
+print(a3_value)
+print(b1_value)
+print(b2_value)
+print(b3_value)
+
+sys = signal.TransferFunction([0, 0, 0, a3_value*b3_value], [1, (-a2_value-b2_value), (-a1_value + a2_value*b2_value), a1_value*b2_value])
+w, mag, phase = signal.bode(sys)
+
+plt.figure()
+plt.semilogx(w, mag) # Bode magnitude plot
+plt.xlabel("Frequency")
+plt.ylabel("magnitude")
+plt.show()
+plt.figure()
+plt.semilogx(w, phase)  # Bode phase plot
+plt.xlabel("Frequency")
+plt.ylabel("Phase")
+plt.show()
