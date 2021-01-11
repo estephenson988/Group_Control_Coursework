@@ -1,0 +1,99 @@
+# x2' = (5*c)/(7*m)*I_eq**2/(delta-x_eq)**2 + (5/7)*g*math.sin(phi) - (5*k)/(7*m)*(x_eq-d)
+# x3' = (V_eq - R*I_eq/(L0 + L1 * sym.exp(-a*(delta-x_eq))))
+
+# Define: z = (x1(0), x2(0), x3(0))  <--- state
+#         v_eq              <--- input
+# Define: z = (x1(0), x3(0), V(0))  <--- state
+#         v_eq              <--- input
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
+
+m = 0.425
+g = 9.81
+d = 0.42
+delta = 0.65
+r = 0.125
+R = 53
+L0 = 0.120
+L1 = 0.025
+a = 1.2
+c = 6.815
+k = 1880
+b = 10.4
+phi = 0.733
+V_eq = 36.06
+x1_eq = 0.479
+x2_eq = 0
+x3_eq = 0.680
+
+
+# system dynamics of non-linear system
+def system_dynamics(t, z):
+    # f(t, z)
+    x1 = z[0]
+    x2 = z[1]
+    x3 = z[2]
+    return [x2,
+            (5 * c) / (7 * m) * x3 ** 2 / (delta - x1) ** 2 + (5 / 7) * g * np.sin(phi) - (5 * k) / (7 * m) * (
+                    x1 - d) - (5 * b * x2) / 7 * m,
+            ((V_eq - R * x3) / (L0 + L1 * np.exp(-a * (delta - x1))))]
+
+
+num_points = 100
+t_final = 2
+z_initial_condition = [0.501, 0.1, 0.697]  # initial conditions close to equilibrium point
+# solving using system dynamics, time, initial conditions
+solution = solve_ivp(system_dynamics,
+                     [0, t_final],
+                     z_initial_condition,
+                     t_eval=np.linspace(0, t_final, num_points))
+
+x1_solution = solution.y[0]
+x2_solution = solution.y[1]
+x3_solution = solution.y[2]
+times = solution.t
+plt.plot(times, x1_solution, label="X1")
+plt.plot(times, x2_solution, label="X2")
+plt.plot(times, x3_solution, label="X3")
+plt.grid()
+plt.xlabel("Time (s)")
+plt.ylabel("x1, x2, x3")
+plt.legend()
+plt.show()
+
+
+def system_dynamics(t, h):
+    # f(t, h)
+    x1 = h[0]
+    x2 = h[1]
+    x3 = h[2]
+    return [x2,
+            ((10 * c * x3_eq ** 2) / (7 * m * (d - x1_eq) ** 3) - 5 * k / (7 * m)) * (x1 - x1_eq) - (5 * b / (7 * m)) * (
+                    x2 - x2_eq) + (10 * c * x3_eq / (7 * m * (d - x1_eq) ** 2)) * (x3 - x3_eq),
+            (-L1 * a * (-R * x3_eq + V_eq) * np.exp(-a * (delta - x1_eq)) / (
+                    L0 + L1 * np.exp(-a * (delta - x1_eq))) ** 2) * (x1 - x1_eq)
+            - (R / (L0 + L1 * np.exp(-a * (delta - x1_eq)))) * (x3 - x3_eq)]
+
+
+num_points = 100
+t_final = 1
+h_initial_condition = [0.501, 0.1, 0.697]
+# solving using system dynamics, time, initial conditions
+solution2 = solve_ivp(system_dynamics,
+                      [0, t_final],
+                      h_initial_condition,
+                      t_eval=np.linspace(0, t_final, num_points))
+
+x1_solution2 = solution2.y[0]
+x2_solution2 = solution2.y[1]
+x3_solution2 = solution2.y[2]
+times2 = solution2.t
+plt.plot(times2, x1_solution2, label="X1")
+plt.plot(times2, x2_solution2, label="X2")
+plt.plot(times2, x3_solution2, label="X3")
+plt.grid()
+plt.xlabel("Time (s)")
+plt.ylabel("x1, x2, x3")
+plt.legend()
+plt.show()
