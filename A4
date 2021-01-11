@@ -1,0 +1,32 @@
+import sympy as sym
+
+# step 1. introduce the necessary symbols
+V, e, m, g, d, delta, r, R, L0, L1, alpha, c, k, b, phi, x1, x2, x3 = sym.symbols('V, e, m, g, d, delta, r, R, L0, L1, alpha, c, k, b, phi, x1, x2, x3')
+
+# step 2. type f(x1, x2, x3)
+f = (5*c)/(7*m)*x3**2/(d-x1)**2 + (5/7)*g*sym.sin(phi) - (5*k)/(7*m)*(x1-d) - (5*b)/(7*m)*x2
+h = (V - R*x3)/(L0 + L1 * sym.exp(-alpha*(delta-x1)))
+
+# step 3. differentiate f wrt x1, x2, x3
+d_f_x1 = f.diff(x1)
+d_f_x2 = f.diff(x2)
+d_f_x3 = f.diff(x3)
+d_h_x1 = h.diff(x1)
+d_h_x3 = h.diff(x3)
+d_h_V = h.diff(V)
+
+# step 4. substitute x1=x1^e, x2=x2^e, x3=x3^e into the
+#         above derivatives
+a1 = d_f_x1.subs([(x1, x1**e), (x2, x2**e), (x3, x3**e)])
+a2 = d_f_x2.subs([(x1, x1**e), (x2, x2**e), (x3, x3**e)])
+a3 = d_f_x3.subs([(x1, x1**e), (x2, x2**e), (x3, x3**e)])
+b1 = d_h_x1.subs([(x1, x1**e), (x3, x3**e), (V,  V**e)])
+b2 = d_h_x3.subs([(x1, x1**e), (x3, x3**e), (V,  V**e)])
+b3 = d_h_V.subs([(x1, x1**e), (x3, x3**e), (V,  V**e)])
+
+sym.pprint(a1)
+sym.pprint(a2)
+sym.pprint(a3)
+sym.pprint(b1)
+sym.pprint(b2)
+sym.pprint(b3)
